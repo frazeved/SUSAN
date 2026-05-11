@@ -1,0 +1,34 @@
+name: PO Breakdown Email
+
+on:
+  workflow_dispatch:
+    inputs:
+      style_number:
+        description: 'Style # to generate PO breakdown for'
+        required: true
+        type: string
+
+jobs:
+  po-breakdown:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run PO Breakdown Email
+      env:
+        STYLE_NUMBER: ${{ inputs.style_number }}
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      run: npm run po-breakdown
