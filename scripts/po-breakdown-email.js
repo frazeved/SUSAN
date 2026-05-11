@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 
 // Configuration
 const SHEET_ID = '1y0iL7PJldbVQmPIAnJi9wvA2hvjB8_aK2bU2kxvUf5Q';
-const GID = '99866922'; // Production & PO DataBase sheet
+const GID = '0'; // Production & PO DataBase sheet
 
 // Email configuration
 const EMAIL_CONFIG = {
