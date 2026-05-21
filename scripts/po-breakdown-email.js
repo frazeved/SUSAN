@@ -45,12 +45,12 @@ function findPOData(data, styleNumber) {
     supplier: getColIndex("supplier"),
     category: getColIndex("category"),
     subcategory: getColIndex("sub-category"),
-    piReceived: getColIndex("pi received"),
-    topSent: getColIndex("top sent to anthro"),
-    topSampleStatus: getColIndex("top sample status"),
-    basePo: getColIndex("base po import farm"),
+    piReceived: getColIndex("buyer presentation"), // Closest match
+    topSent: getColIndex("sms sent to anthro"), // SMS SENT TO ANTHRO
+    topSampleStatus: getColIndex("top approval from anthro"), // TOP APPROVAL FROM ANTHRO
+    basePo: getColIndex("po info anthro"), // PO INFO ANTHRO
     finalNDC: getColIndex("final ndc"),
-    topDeadline: getColIndex("top deadline"),
+    topDeadline: getColIndex("sms deadline"), // SMS deadline
     exFactory: getColIndex("ex factory / flight date"),
     cost: getColIndex("cost"),
     freight: getColIndex("freight"),

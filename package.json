@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "po-breakdown": "node scripts/po-breakdown-email.js"
+    "po-breakdown": "node scripts/po-breakdown-email.js",
+    "po-weekly-sup-report": "node scripts/po-weekly-sup-report.js"
   },
   "dependencies": {
     "googleapis": "^144.0.0",
