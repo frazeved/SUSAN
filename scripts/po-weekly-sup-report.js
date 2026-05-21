@@ -1,20 +1,6 @@
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 
-function makeOAuth2Client() {
-  return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    'urn:ietf:wg:oauth:2.0:oob'
-  );
-}
-
-function buildRawMime(mailOptions) {
-  return new Promise((resolve, reject) => {
-    const t = nodemailer.createTransport({ streamTransport: true, newline: 'unix', buffer: true });
-    t.sendMail(mailOptions, (err, info) => err ? reject(err) : resolve(info.message));
-  });
-}
 
 const SHEET_ID = '1y0iL7PJldbVQmPIAnJi9wvA2hvjB8_aK2bU2kxvUf5Q';
 
@@ -198,15 +184,16 @@ async function writeSheetReport(sheets, reportMap) {
   console.log(`✅ Sheet report created: "${sheetName}" — ${Object.keys(reportMap).length} suppliers, ${totalStyles} styles`);
 }
 
-// ── Step 3: create Gmail drafts per supplier ─────────────────────────────────
+// ── Step 3: send supplier emails ─────────────────────────────────────────────
 
-async function createSupplierDrafts(emailMap) {
-  const authClient = makeOAuth2Client();
-  authClient.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-  const gmail = google.gmail({ version: 'v1', auth: authClient });
+async function sendSupplierEmails(emailMap) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+  });
 
   const todaySlash = todayFormatted('/');
-  let created = 0;
+  let sent = 0;
 
   for (const supplier of Object.keys(emailMap).sort()) {
     const contact = SUPPLIER_CONTACTS[supplier];
@@ -234,22 +221,19 @@ async function createSupplierDrafts(emailMap) {
 
     htmlBody += `</table><br>Best regards,<br>`;
 
-    const rawMime = await buildRawMime({
-      from: `"305 Team" <${process.env.GMAIL_SENDER_EMAIL}>`,
+    await transporter.sendMail({
+      from: `"305 Team" <${process.env.EMAIL_USER}>`,
       to,
       cc: CC_LIST.join(', '),
       subject,
       html: htmlBody
     });
 
-    const encoded = rawMime.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    await gmail.users.drafts.create({ userId: 'me', requestBody: { message: { raw: encoded } } });
-
-    console.log(`  📝  Draft created for ${supplier} (${rows.length} styles)`);
-    created++;
+    console.log(`  ✉️  Sent to ${supplier} (${rows.length} styles)`);
+    sent++;
   }
 
-  console.log(`✅ ${created} Gmail drafts created`);
+  console.log(`✅ Emails sent to ${sent} suppliers`);
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -271,7 +255,7 @@ async function main() {
   const { reportMap, emailMap } = buildSupplierData(data);
 
   await writeSheetReport(sheets, reportMap);
-  await createSupplierDrafts(emailMap);
+  await sendSupplierEmails(emailMap);
 }
 
 main().catch(err => {
